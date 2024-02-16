@@ -4,12 +4,19 @@ import {HttpClient} from "@angular/common/http";
 import {interval, map, Subscription, take} from "rxjs";
 import * as L from "leaflet";
 interface IssObject{
+  name: string,
+  id: number,
+  latitude: number,
+  longitude: number,
+  altitude: number,
+  velocity: number,
+  visibility: string,
+  footprint: number,
   timestamp: number,
-  message: string,
-  iss_position: {
-    longitude: string,
-    latitude: string
-  }
+  daynum: number,
+  solar_lat: number,
+  solar_lon: number,
+  units: string
 }
 
 @Component({
@@ -19,7 +26,7 @@ interface IssObject{
 })
 export class AppComponent implements OnInit,OnDestroy{
   private httpClient = inject(HttpClient)
-  private issURL = 'http://api.open-notify.org/iss-now.json';
+  private issURL = 'https://api.wheretheiss.at/v1/satellites/25544';
   private intervalSub = new Subscription()
   center = latLng(46.879966, -121.726909)
   map: L.Map | undefined;
@@ -44,7 +51,7 @@ export class AppComponent implements OnInit,OnDestroy{
   ngOnInit() {
     this.intervalSub = interval(2000).subscribe(() => {
       this.httpClient.get(this.issURL).pipe(take(1),map(rawData=> rawData as IssObject)).subscribe(issObject=>{
-        this.center = latLng(Number(issObject.iss_position.latitude),Number(issObject.iss_position.longitude));
+        this.center = latLng(Number(issObject.latitude),Number(issObject.longitude));
         if(this.map){
           this.marker?.remove();
           this.marker = L.marker(this.center,this.icon).addTo(this.map);
